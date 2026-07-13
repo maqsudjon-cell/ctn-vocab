@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>CTN Vocab — Language Centre</title>
+<meta name="description" content="CTN Language Centre interactive vocabulary trainer">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eaf7fc; --card:#ffffff; --ink:#13275b; --ink2:#5a6b94; --brand:#1fb4e6; --brand2:#0d8fc0;
+  --navy:#13275b; --gold:#f5a623; --green:#2ec27e; --red:#ef5350; --chip:#e3f4fb; --key:#f0f6fa;
+  --shadow:0 6px 20px rgba(19,39,91,.10);
+}
+[data-theme="sunset"]{ --bg:#fdf1e7; --brand:#ff7043; --brand2:#e64a19; --chip:#ffe4d6; --key:#fdf3ec; }
+[data-theme="forest"]{ --bg:#eaf6ec; --brand:#43a047; --brand2:#2e7d32; --chip:#dcefdf; --key:#f0f7f1; }
+[data-theme="galaxy"]{ --bg:#171a2e; --card:#232748; --ink:#eef0ff; --ink2:#9aa3d0; --brand:#7c6cf0; --brand2:#5b4bd6; --chip:#2e3358; --key:#2a2e52; --shadow:0 6px 20px rgba(0,0,0,.4); }
+[data-theme="candy"]{ --bg:#fdeef5; --brand:#ec5fa0; --brand2:#d13c85; --chip:#fbdcea; --key:#fcf0f5; }
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Nunito',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);min-height:100vh;transition:background .3s}
+#app{max-width:560px;margin:0 auto;padding:12px 14px 90px}
+.hidden{display:none!important}
+button{font-family:inherit;cursor:pointer;border:none}
+
+/* ---------- header ---------- */
+.top{display:flex;align-items:center;justify-content:space-between;padding:6px 0 12px}
+.logo{display:flex;align-items:center;gap:8px}
+.logo-mark{position:relative;font-weight:900;font-size:24px;color:var(--ink);letter-spacing:1px}
+.logo-mark svg{position:absolute;right:-14px;top:-6px}
+.logo-sub{font-size:9.5px;font-weight:800;letter-spacing:1.6px;color:var(--brand);line-height:1.15;text-transform:uppercase}
+.stats{display:flex;gap:6px}
+.stat{display:flex;align-items:center;gap:4px;background:var(--card);border-radius:20px;padding:5px 11px;font-weight:800;font-size:14px;box-shadow:var(--shadow)}
+.stat.avatar{font-size:18px;padding:4px 9px;cursor:pointer}
+
+/* ---------- cards / home ---------- */
+.hero{background:linear-gradient(135deg,var(--brand),var(--brand2));border-radius:20px;padding:18px;color:#fff;margin-bottom:14px;box-shadow:var(--shadow)}
+.hero h2{font-size:19px;font-weight:900;margin-bottom:3px}
+.hero p{font-size:13px;opacity:.92;font-weight:600}
+.hero .row{display:flex;justify-content:space-between;align-items:center}
+.review-btn{background:#fff;color:var(--brand2);border-radius:14px;padding:9px 15px;font-weight:900;font-size:13px;box-shadow:0 3px 8px rgba(0,0,0,.15)}
+.tabs{display:flex;gap:7px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{white-space:nowrap;background:var(--card);color:var(--ink2);border-radius:20px;padding:8px 15px;font-weight:800;font-size:13.5px;box-shadow:var(--shadow)}
+.tab.on{background:var(--navy);color:#fff}
+[data-theme="galaxy"] .tab.on{background:var(--brand)}
+.units{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.unit{background:var(--card);border-radius:18px;padding:14px;box-shadow:var(--shadow);cursor:pointer;position:relative;transition:transform .12s}
+.unit:active{transform:scale(.96)}
+.unit .em{font-size:30px}
+.unit h3{font-size:14.5px;font-weight:800;margin:7px 0 3px;line-height:1.2}
+.unit .meta{font-size:11.5px;color:var(--ink2);font-weight:700}
+.unit .stars{position:absolute;top:10px;right:11px;font-size:11px;letter-spacing:-1px}
+.ring{position:absolute;bottom:12px;right:11px;width:30px;height:30px}
+.ring circle{fill:none;stroke-width:4}
+.ring .bgc{stroke:var(--chip)}
+.ring .fgc{stroke:var(--green);stroke-linecap:round;transform:rotate(-90deg);transform-origin:center}
+.ring text{font-size:9.5px;font-weight:800;fill:var(--ink2)}
+
+/* ---------- session ---------- */
+.sess-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.icon-btn{background:var(--card);border-radius:12px;width:38px;height:38px;font-size:16px;box-shadow:var(--shadow);color:var(--ink)}
+.sbar{flex:1;height:12px;background:var(--card);border-radius:8px;overflow:hidden;box-shadow:var(--shadow)}
+.sbar i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--green));border-radius:8px;transition:width .3s}
+.stage-chips{display:flex;gap:5px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+.schip{font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:12px;background:var(--card);color:var(--ink2);box-shadow:var(--shadow)}
+.schip.on{background:var(--brand);color:#fff}
+.schip.done{background:var(--green);color:#fff}
+.ex-card{background:var(--card);border-radius:20px;padding:22px 18px;text-align:center;box-shadow:var(--shadow);min-height:220px;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.big-word{font-size:32px;font-weight:900;color:var(--brand2)}
+[data-theme="galaxy"] .big-word{color:var(--brand)}
+.pos{font-size:12px;color:var(--ink2);font-weight:800;text-transform:uppercase;letter-spacing:1px}
+.defin{font-size:16.5px;font-weight:700;line-height:1.45}
+.examp{font-size:14px;color:var(--ink2);font-style:italic;font-weight:600;line-height:1.5}
+.prompt{font-size:13px;color:var(--ink2);font-weight:800;text-transform:uppercase;letter-spacing:.8px}
+.gap-sent{font-size:18px;font-weight:700;line-height:1.6}
+.gap-sent b{color:var(--brand2);border-bottom:3px solid var(--brand);padding:0 4px;letter-spacing:2px}
+.opts{display:grid;gap:9px;margin-top:14px}
+.opt{background:var(--card);border:2.5px solid var(--chip);border-radius:15px;padding:13px 15px;font-size:15.5px;font-weight:800;color:var(--ink);text-align:left;transition:all .15s}
+.opt:active{transform:scale(.97)}
+.opt.ok{border-color:var(--green);background:var(--green);color:#fff}
+.opt.bad{border-color:var(--red);background:var(--red);color:#fff;animation:shake .35s}
+.opt:disabled{opacity:.85}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.audio-btn{background:var(--chip);color:var(--brand2);border-radius:14px;padding:10px 18px;font-weight:900;font-size:14px;align-self:center}
+[data-theme="galaxy"] .audio-btn{color:#fff}
+.next-btn{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-radius:16px;padding:14px;font-size:16px;font-weight:900;width:100%;margin-top:14px;box-shadow:var(--shadow)}
+.ghost-btn{background:transparent;color:var(--ink2);font-weight:800;font-size:13.5px;padding:10px;width:100%}
+.feedback{min-height:26px;text-align:center;font-weight:900;font-size:15px;margin-top:8px}
+
+/* chips builder */
+.built,.pool{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;min-height:44px;padding:9px;border-radius:14px}
+.built{background:var(--chip);margin-bottom:10px}
+.chipw{background:var(--card);border:2px solid var(--brand);color:var(--ink);border-radius:11px;padding:8px 12px;font-weight:800;font-size:14.5px;transition:transform .1s}
+.chipw:active{transform:scale(.93)}
+.chipw.used{opacity:.25;pointer-events:none}
+.built .chipw{border-color:var(--green)}
+
+/* spelling */
+.slots{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;margin:10px 0}
+.slot{width:34px;height:44px;border-radius:9px;background:var(--chip);border:2.5px solid transparent;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;text-transform:uppercase}
+.slot.ok{border-color:var(--green);color:var(--green);background:var(--card)}
+.slot.bad{border-color:var(--red);color:var(--red);animation:shake .3s}
+.slot.hint{border-color:var(--gold);color:var(--gold)}
+.kb{margin-top:12px;user-select:none}
+.kb-row{display:flex;justify-content:center;gap:5px;margin-bottom:6px}
+.key{flex:1;max-width:42px;height:46px;background:var(--card);border-radius:9px;color:var(--ink);font-size:15.5px;font-weight:800;text-transform:uppercase;box-shadow:0 2px 5px rgba(19,39,91,.12)}
+.key:active{background:var(--brand);color:#fff}
+.key.wide{max-width:64px;font-size:12px}
+
+/* ---------- end screen ---------- */
+.end-wrap{text-align:center;padding-top:30px}
+.chest{font-size:84px;animation:pop .6s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{0%{transform:scale(0)}100%{transform:scale(1)}}
+.end-stars{font-size:38px;letter-spacing:4px;margin:8px 0}
+.end-coins{font-size:22px;font-weight:900;color:var(--gold)}
+.end-note{color:var(--ink2);font-weight:700;font-size:14px;margin:8px 0 20px}
+
+/* ---------- shop ---------- */
+.shop-tabs{display:flex;gap:7px;margin-bottom:13px}
+.shop-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.item{background:var(--card);border-radius:16px;padding:13px 8px;text-align:center;box-shadow:var(--shadow)}
+.item .ic{font-size:32px}
+.item .nm{font-size:11.5px;font-weight:800;margin:5px 0 7px}
+.buy{background:var(--gold);color:#fff;border-radius:11px;padding:6px 12px;font-weight:900;font-size:12px}
+.buy.owned{background:var(--chip);color:var(--ink2)}
+.buy.equip{background:var(--green)}
+.theme-dot{width:32px;height:32px;border-radius:50%;margin:0 auto;border:3px solid var(--chip)}
+
+/* ---------- nav / misc ---------- */
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);display:flex;justify-content:space-around;padding:9px 0 max(9px,env(safe-area-inset-bottom));box-shadow:0 -4px 18px rgba(19,39,91,.12);z-index:50}
+.nav button{background:none;font-size:11px;font-weight:800;color:var(--ink2);display:flex;flex-direction:column;align-items:center;gap:2px;width:70px}
+.nav button span{font-size:21px}
+.nav button.on{color:var(--brand2)}
+[data-theme="galaxy"] .nav button.on{color:var(--brand)}
+.badge-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.bdg{background:var(--card);border-radius:16px;padding:12px 6px;text-align:center;box-shadow:var(--shadow)}
+.bdg .ic{font-size:30px;filter:grayscale(1);opacity:.35}
+.bdg.won .ic{filter:none;opacity:1}
+.bdg .nm{font-size:10.5px;font-weight:800;margin-top:4px;color:var(--ink2)}
+.bdg.won .nm{color:var(--ink)}
+.sect-title{font-size:16px;font-weight:900;margin:16px 0 10px}
+.footer{margin-top:26px;text-align:center;font-size:12.5px;color:var(--ink2);font-weight:700;line-height:2}
+.footer a{color:var(--brand2);text-decoration:none;font-weight:900}
+[data-theme="galaxy"] .footer a{color:var(--brand)}
+.confetti{position:fixed;top:-12px;font-size:16px;animation:fall linear forwards;z-index:99;pointer-events:none}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+.coin-fly{position:fixed;font-size:22px;z-index:99;pointer-events:none;animation:flyup 1s ease-out forwards}
+@keyframes flyup{to{transform:translateY(-90px);opacity:0}}
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 20px;border-radius:14px;font-weight:800;font-size:14px;z-index:100;box-shadow:var(--shadow);animation:pop .3s}
+.settings-row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border-radius:15px;padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow);font-weight:800;font-size:14.5px}
+.pill{background:var(--chip);border-radius:12px;padding:7px 14px;font-weight:900;font-size:13px;color:var(--brand2)}
+[data-theme="galaxy"] .pill{color:#fff}
+@media(max-width:380px){.units{gap:8px}.slot{width:30px;height:40px;font-size:17px}.key{height:42px}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- header -->
+  <div class="top">
+    <div class="logo">
+      <div>
+        <div class="logo-mark">CTN
+          <svg width="26" height="34" viewBox="0 0 26 34"><ellipse cx="13" cy="17" rx="8" ry="15" fill="none" stroke="var(--brand)" stroke-width="3" transform="rotate(18 13 17)"/></svg>
+        </div>
+      </div>
+      <div class="logo-sub">Language<br>Centre</div>
+    </div>
+    <div class="stats">
+      <div class="stat">🪙 <span id="coinN">0</span></div>
+      <div class="stat">🔥 <span id="strkN">0</span></div>
+      <div class="stat avatar" id="avatarBtn">🙂</div>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div id="scrHome">
+    <div class="hero">
+      <div class="row">
+        <div>
+          <h2 id="heroTitle">Welcome! 👋</h2>
+          <p id="heroSub">Learn new words, earn coins, win prizes!</p>
+        </div>
+        <button class="review-btn hidden" id="reviewBtn">🎯 Review<br><span id="reviewN"></span></button>
+      </div>
+    </div>
+    <div class="tabs" id="sectTabs"></div>
+    <div class="units" id="unitGrid"></div>
+    <div class="footer">
+      <b>CTN Language Centre</b><br>
+      📞 +998 99 664 06 06<br>
+      <a href="https://t.me/ctnlc" target="_blank">✈️ Telegram</a> &nbsp;·&nbsp;
+      <a href="https://instagram.com/ctn_language_center" target="_blank">📸 Instagram</a>
+    </div>
+  </div>
+
+  <!-- SESSION -->
+  <div id="scrSess" class="hidden">
+    <div class="sess-top">
+      <button class="icon-btn" id="quitBtn">✕</button>
+      <div class="sbar"><i id="sbarFill" style="width:0%"></i></div>
+      <div class="stat">🪙 <span id="sessCoins">0</span></div>
+    </div>
+    <div class="stage-chips" id="stageChips"></div>
+    <div id="sessBody"></div>
+  </div>
+
+  <!-- SHOP -->
+  <div id="scrShop" class="hidden">
+    <div class="sect-title">🎁 Gift Shop</div>
+    <div class="shop-tabs tabs" id="shopTabs"></div>
+    <div class="shop-grid" id="shopGrid"></div>
+  </div>
+
+  <!-- PROFILE -->
+  <div id="scrProf" class="hidden">
+    <div class="sect-title">🏅 My Badges</div>
+    <div class="badge-grid" id="badgeGrid"></div>
+    <div class="sect-title">⭐ My Stickers</div>
+    <div class="shop-grid" id="stickerShelf"></div>
+    <div class="sect-title">⚙️ Settings</div>
+    <div class="settings-row">Accent <button class="pill" id="accentBtn">🇬🇧 UK</button></div>
+    <div class="settings-row">Sound <button class="pill" id="soundBtn">🔔 On</button></div>
+    <div class="settings-row">Reset progress <button class="pill" id="resetBtn" style="color:var(--red)">Reset</button></div>
+  </div>
+
+  <!-- nav -->
+  <div class="nav">
+    <button id="navHome" class="on"><span>📚</span>Learn</button>
+    <button id="navShop"><span>🎁</span>Shop</button>
+    <button id="navProf"><span>🏅</span>Profile</button>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="data2.js"></script>
+<script>
+/* ================= state ================= */
+const DEFAULTS = { coins:0, streak:0, lastDay:'', avatar:'🙂', owned:['🙂'], theme:'ocean', ownedThemes:['ocean'],
+  stickers:[], badges:[], units:{}, words:{}, accent:'en-GB', sound:true, totalCorrect:0 };
+let S = load();
+function load(){ try{ const s = JSON.parse(localStorage.getItem('ctnVocab')||'{}'); return {...DEFAULTS, ...s}; }catch(e){ return {...DEFAULTS}; } }
+function save(){ localStorage.setItem('ctnVocab', JSON.stringify(S)); }
+const $ = id => document.getElementById(id);
+const ALL_UNITS = VOCAB.sections.flatMap(s => s.units.map(u => ({...u, section:s.name})));
+const ALL_WORDS = ALL_UNITS.flatMap(u => u.words);
+
+/* ================= daily streak ================= */
+(function(){
+  const today = new Date().toISOString().slice(0,10);
+  if (S.lastDay !== today){
+    const yest = new Date(Date.now()-864e5).toISOString().slice(0,10);
+    S.streak = (S.lastDay === yest) ? S.streak+1 : 1;
+    S.lastDay = today;
+    if (S.streak > 1){ S.coins += 5; setTimeout(()=>toast(`🔥 Day ${S.streak} streak! +5 coins`),600); }
+    save();
+  }
+})();
+
+/* ================= audio ================= */
+let AC;
+function sfx(kind){
+  if (!S.sound) return;
+  try{
+    AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.connect(g); g.connect(AC.destination);
+    const t = AC.currentTime;
+    if (kind==='ok'){ o.frequency.setValueAtTime(660,t); o.frequency.setValueAtTime(880,t+.09); g.gain.setValueAtTime(.15,t); g.gain.linearRampToValueAtTime(0,t+.22); o.start(t); o.stop(t+.22); }
+    else if (kind==='bad'){ o.frequency.setValueAtTime(220,t); o.type='square'; g.gain.setValueAtTime(.08,t); g.gain.linearRampToValueAtTime(0,t+.25); o.start(t); o.stop(t+.25); }
+    else if (kind==='coin'){ o.frequency.setValueAtTime(988,t); o.frequency.setValueAtTime(1319,t+.07); g.gain.setValueAtTime(.12,t); g.gain.linearRampToValueAtTime(0,t+.3); o.start(t); o.stop(t+.3); }
+    else if (kind==='win'){ [523,659,784,1047].forEach((f,i)=>{ const o2=AC.createOscillator(),g2=AC.createGain(); o2.connect(g2);g2.connect(AC.destination); o2.frequency.value=f; g2.gain.setValueAtTime(.13,t+i*.12); g2.gain.linearRampToValueAtTime(0,t+i*.12+.25); o2.start(t+i*.12); o2.stop(t+i*.12+.25); }); }
+  }catch(e){}
+}
+function speak(word){
+  try{
+    const u = new SpeechSynthesisUtterance(word);
+    u.lang = S.accent; u.rate = .85;
+    const v = speechSynthesis.getVoices().find(v=>v.lang.replace('_','-')===S.accent);
+    if (v) u.voice = v;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ================= fx ================= */
+function toast(msg){ const d=document.createElement('div'); d.className='toast'; d.textContent=msg; document.body.appendChild(d); setTimeout(()=>d.remove(),2200); }
+function confetti(){
+  const em = ['🎉','⭐','🎊','✨','🪙','💙'];
+  for (let i=0;i<34;i++){ const d=document.createElement('div'); d.className='confetti';
+    d.textContent = em[i%em.length]; d.style.left = Math.random()*100+'vw';
+    d.style.animationDuration = (1.6+Math.random()*1.6)+'s'; d.style.fontSize=(13+Math.random()*14)+'px';
+    document.body.appendChild(d); setTimeout(()=>d.remove(),3400); }
+}
+function coinFly(x,y,n){ for(let i=0;i<Math.min(n,5);i++){ const d=document.createElement('div'); d.className='coin-fly'; d.textContent='🪙';
+  d.style.left=(x-10+Math.random()*40)+'px'; d.style.top=y+'px'; d.style.animationDelay=(i*.08)+'s';
+  document.body.appendChild(d); setTimeout(()=>d.remove(),1300); } }
+function earn(n, ev){ S.coins += n; sess && (sess.coins += n); save(); renderStats(); sfx('coin');
+  if (ev) coinFly(ev.clientX||window.innerWidth/2, ev.clientY||300, n);
+  $('sessCoins') && ($('sessCoins').textContent = sess ? sess.coins : 0); checkBadges(); }
+
+/* ================= badges ================= */
+const BADGES = [
+  {id:'first', ic:'🌱', nm:'First Word', test:s=>s.totalCorrect>=1},
+  {id:'hunter', ic:'🔎', nm:'Word Hunter', test:s=>s.totalCorrect>=25},
+  {id:'master', ic:'🎓', nm:'Word Master', test:s=>s.totalCorrect>=100},
+  {id:'legend', ic:'🏆', nm:'Legend', test:s=>s.totalCorrect>=300},
+  {id:'rich', ic:'💰', nm:'Coin Collector', test:s=>s.coins>=200},
+  {id:'fire', ic:'🔥', nm:'On Fire (7 days)', test:s=>s.streak>=7},
+  {id:'perfect', ic:'💎', nm:'Perfect Unit', test:s=>Object.values(s.units).some(u=>u.stars===3)},
+  {id:'five', ic:'🚀', nm:'5 Units Done', test:s=>Object.values(s.units).filter(u=>u.done).length>=5},
+  {id:'ten', ic:'👑', nm:'10 Units Done', test:s=>Object.values(s.units).filter(u=>u.done).length>=10},
+];
+function checkBadges(){
+  BADGES.forEach(b=>{ if (!S.badges.includes(b.id) && b.test(S)){ S.badges.push(b.id); save(); toast(`🏅 New badge: ${b.nm}!`); sfx('win'); } });
+}
+
+/* ================= shop ================= */
+const SHOP = {
+  Avatars: [ ['🦊',60],['🐼',80],['🐸',60],['🦁',100],['🐯',100],['🤖',120],['🦄',180],['🧙‍♂️',200],['🐙',90],['👑',250],['🐉',300],['⚡',150] ],
+  Themes: [ ['ocean',0,'#1fb4e6'],['sunset',120,'#ff7043'],['forest',120,'#43a047'],['candy',150,'#ec5fa0'],['galaxy',250,'#7c6cf0'] ],
+  Stickers: [ ['🍕',40],['🚀',40],['🎸',50],['🌈',50],['🎮',60],['🍦',40],['⚽',40],['🎨',50],['🛸',70],['🏆',80],['🐳',60],['🌟',50] ],
+};
+let shopTab = 'Avatars';
+function renderShop(){
+  $('shopTabs').innerHTML = Object.keys(SHOP).map(t=>`<button class="tab ${t===shopTab?'on':''}" onclick="shopTab='${t}';renderShop()">${t}</button>`).join('');
+  const g = $('shopGrid'); g.innerHTML = '';
+  SHOP[shopTab].forEach(([it,price,color])=>{
+    const d = document.createElement('div'); d.className='item';
+    if (shopTab==='Themes'){
+      const owned = S.ownedThemes.includes(it), on = S.theme===it;
+      d.innerHTML = `<div class="theme-dot" style="background:${color}"></div><div class="nm">${it[0].toUpperCase()+it.slice(1)}</div>
+        <button class="buy ${owned?(on?'equip':'owned'):''}">${on?'Active':owned?'Use':'🪙 '+price}</button>`;
+      d.querySelector('button').onclick = ()=>{
+        if (!owned){ if (!spend(price)) return; S.ownedThemes.push(it); toast('🎨 Theme unlocked!'); }
+        S.theme = it; save(); applyTheme(); renderShop();
+      };
+    } else if (shopTab==='Avatars'){
+      const owned = S.owned.includes(it), on = S.avatar===it;
+      d.innerHTML = `<div class="ic">${it}</div><div class="nm">&nbsp;</div>
+        <button class="buy ${owned?(on?'equip':'owned'):''}">${on?'Me!':owned?'Use':'🪙 '+price}</button>`;
+      d.querySelector('button').onclick = ()=>{
+        if (!owned){ if (!spend(price)) return; S.owned.push(it); toast('🎉 New avatar!'); confetti(); }
+        S.avatar = it; save(); renderStats(); renderShop();
+      };
+    } else {
+      const owned = S.stickers.includes(it);
+      d.innerHTML = `<div class="ic">${it}</div><div class="nm">&nbsp;</div>
+        <button class="buy ${owned?'owned':''}">${owned?'Mine ✓':'🪙 '+price}</button>`;
+      d.querySelector('button').onclick = ()=>{
+        if (owned) return;
+        if (!spend(price)) return; S.stickers.push(it); save(); toast('⭐ Sticker collected!'); renderShop();
+      };
+    }
+    g.appendChild(d);
+  });
+}
+function spend(n){ if (S.coins < n){ toast(`Need ${n-S.coins} more coins! Keep learning 💪`); sfx('bad'); return false; } S.coins -= n; save(); renderStats(); return true; }
+function applyTheme(){ document.documentElement.setAttribute('data-theme', S.theme); }
+
+/* ================= home ================= */
+let curSect = 'All';
+function unitProg(u){
+  const st = S.units[u.id] || {};
+  const mastered = u.words.filter(w => (S.words[w.w]||{}).mastered).length;
+  return { done:!!st.done, stars:st.stars||0, pct: Math.round(100*mastered/u.words.length) };
+}
+function renderStats(){ $('coinN').textContent=S.coins; $('strkN').textContent=S.streak; $('avatarBtn').textContent=S.avatar; }
+function renderHome(){
+  renderStats();
+  const sections = ['All', ...VOCAB.sections.map(s=>s.name)];
+  $('sectTabs').innerHTML = sections.map(s=>`<button class="tab ${s===curSect?'on':''}" onclick="curSect='${s}';renderHome()">${s}</button>`).join('');
+  const g = $('unitGrid'); g.innerHTML = '';
+  ALL_UNITS.filter(u => curSect==='All' || u.section===curSect).forEach(u=>{
+    const p = unitProg(u);
+    const d = document.createElement('div'); d.className='unit';
+    const circ = 2*Math.PI*12;
+    d.innerHTML = `<div class="em">${u.emoji}</div><h3>${u.title}</h3>
+      <div class="meta">${u.words.length} words</div>
+      <div class="stars">${'⭐'.repeat(p.stars)}</div>
+      <svg class="ring" viewBox="0 0 30 30"><circle class="bgc" cx="15" cy="15" r="12"/>
+      <circle class="fgc" cx="15" cy="15" r="12" stroke-dasharray="${circ}" stroke-dashoffset="${circ*(1-p.pct/100)}"/>
+      ${p.pct>=100?'<text x="15" y="19" text-anchor="middle">✓</text>':''}</svg>`;
+    d.onclick = ()=>startSession(u);
+    g.appendChild(d);
+  });
+  const tricky = trickyWords();
+  $('reviewBtn').classList.toggle('hidden', tricky.length===0);
+  $('reviewN').textContent = tricky.length + ' words';
+  const done = Object.values(S.units).filter(u=>u.done).length;
+  $('heroTitle').textContent = done===0 ? 'Welcome! 👋' : `Great work! 💪`;
+  $('heroSub').textContent = done===0 ? 'Learn new words, earn coins, win prizes!' : `${done} units done · ${S.coins} coins earned`;
+}
+function trickyWords(){
+  return ALL_WORDS.filter(w => { const st=S.words[w.w]; return st && st.wrong>0 && !st.mastered; }).slice(0,10);
+}
+
+/* ================= session engine ================= */
+const STAGES = ['Learn','Choose','Gap Fill','Builder','Spelling'];
+let sess = null;
+function startSession(u, reviewMode=false){
+  sess = { unit:u, review:reviewMode, stage:0, i:0, coins:0, firstTry:0, attempts:0, typed:[], hintUsed:false, wrongOnce:false };
+  showScreen('sess');
+  renderStage();
+}
+function wordStat(w){ return S.words[w] = S.words[w] || {seen:0, wrong:0, correct:0, mastered:false}; }
+function items(){ return sess.unit.words; }
+function totalSteps(){ return STAGES.length * items().length; }
+function stepNum(){ return sess.stage * items().length + sess.i; }
+function renderChips(){
+  $('stageChips').innerHTML = STAGES.map((s,i)=>`<div class="schip ${i===sess.stage?'on':i<sess.stage?'done':''}">${i<sess.stage?'✓ ':''}${s}</div>`).join('');
+  $('sbarFill').style.width = (100*stepNum()/totalSteps())+'%';
+  $('sessCoins').textContent = sess.coins;
+}
+function advance(){
+  sess.i++;
+  if (sess.i >= items().length){ sess.i = 0; sess.stage++;
+    if (sess.stage >= STAGES.length) return endSession();
+    toast(`${STAGES[sess.stage-1]} done! ✓`);
+  }
+  renderStage();
+}
+function renderStage(){
+  renderChips();
+  sess.wrongOnce = false; sess.hintUsed = false; sess.typed = [];
+  const w = items()[sess.i];
+  const stage = sess.review ? [0,1,4][Math.min(sess.stage,2)] : sess.stage;
+  [renderLearn, renderMCQ, renderGap, renderBuilder, renderSpell][stage](w);
+}
+
+/* stage 0: learn */
+function renderLearn(w){
+  wordStat(w.w).seen++;
+  save();
+  $('sessBody').innerHTML = `
+    <div class="ex-card">
+      <div class="prompt">New word ${sess.i+1}/${items().length}</div>
+      <div class="big-word">${w.w}</div>
+      ${w.pos?`<div class="pos">${w.pos}</div>`:''}
+      <div class="defin">${w.d}</div>
+      <div class="examp">“${w.ex}”</div>
+      <button class="audio-btn" onclick="speak('${w.w.replace(/'/g,"\\'")}')">🔊 Listen</button>
+    </div>
+    <button class="next-btn" onclick="advance()">Got it! →</button>`;
+  speak(w.w);
+}
+
+/* stage 1: MCQ (definition -> word) */
+function renderMCQ(w){
+  const opts = pickOptions(w, 4);
+  $('sessBody').innerHTML = `
+    <div class="ex-card" style="min-height:150px">
+      <div class="prompt">Which word means…</div>
+      <div class="defin">${w.d}</div>
+    </div>
+    <div class="opts">${opts.map(o=>`<button class="opt" data-w="${o.w}">${o.w}</button>`).join('')}</div>
+    <div class="feedback" id="fb"></div>`;
+  document.querySelectorAll('.opt').forEach(b=>b.onclick = e=>answer(b.dataset.w===w.w, b, e, 2, w));
+}
+function pickOptions(w, n){
+  const pool = ALL_WORDS.filter(x=>x.w!==w.w && x.w.length>2);
+  const near = pool.sort(()=>Math.random()-.5).slice(0,n-1);
+  return [...near, w].sort(()=>Math.random()-.5);
+}
+
+/* stage 2: gap fill */
+function renderGap(w){
+  const rx = new RegExp('\\b'+w.w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i');
+  const sent = rx.test(w.ex) ? w.ex.replace(rx,'<b>______</b>') : `<b>______</b> — ${w.d}`;
+  const opts = pickOptions(w, 4);
+  $('sessBody').innerHTML = `
+    <div class="ex-card" style="min-height:150px">
+      <div class="prompt">Complete the sentence</div>
+      <div class="gap-sent">${sent}</div>
+      <button class="audio-btn" onclick="speak('${w.ex.replace(/'/g,"\\'")}')">🔊</button>
+    </div>
+    <div class="opts">${opts.map(o=>`<button class="opt" data-w="${o.w}">${o.w}</button>`).join('')}</div>
+    <div class="feedback" id="fb"></div>`;
+  document.querySelectorAll('.opt').forEach(b=>b.onclick = e=>answer(b.dataset.w===w.w, b, e, 3, w));
+}
+
+/* shared MCQ answer */
+function answer(ok, btn, ev, coins, w){
+  if (ok){
+    btn.classList.add('ok'); sfx('ok');
+    const clean = !sess.wrongOnce;
+    if (clean){ sess.firstTry++; earn(coins, ev); wordStat(w.w).correct++; }
+    else earn(1, ev);
+    S.totalCorrect++; save(); checkBadges();
+    document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+    setTimeout(advance, 750);
+  } else {
+    btn.classList.add('bad'); btn.disabled = true; sfx('bad');
+    sess.wrongOnce = true; wordStat(w.w).wrong++; save();
+    $('fb').textContent = 'Try again! 💪'; $('fb').style.color = 'var(--red)';
+  }
+}
+
+/* stage 3: sentence builder */
+function renderBuilder(w){
+  const words = w.ex.replace(/[“”]/g,'').split(' ');
+  const shuffled = words.map((t,i)=>({t,i})).sort(()=>Math.random()-.5);
+  sess.builderPos = 0;
+  $('sessBody').innerHTML = `
+    <div class="ex-card" style="min-height:120px;padding:16px">
+      <div class="prompt">Build the sentence</div>
+      <div class="defin" style="font-size:14px">Word: <b style="color:var(--brand2)">${w.w}</b> — ${w.d}</div>
+      <button class="audio-btn" onclick="speak('${w.ex.replace(/'/g,"\\'")}')">🔊 Hear sentence</button>
+    </div>
+    <div class="built" id="built"></div>
+    <div class="pool" id="pool"></div>
+    <div class="feedback" id="fb"></div>`;
+  const pool = $('pool');
+  shuffled.forEach(({t,i})=>{
+    const b = document.createElement('button'); b.className='chipw'; b.textContent=t;
+    b.onclick = (e)=>{
+      if (i === sess.builderPos){
+        b.classList.add('used'); sess.builderPos++;
+        const c = document.createElement('span'); c.className='chipw'; c.textContent=t; $('built').appendChild(c);
+        sfx('ok');
+        if (sess.builderPos === words.length){
+          const clean = !sess.wrongOnce;
+          if (clean){ sess.firstTry++; earn(4, e); wordStat(w.w).correct++; } else earn(2, e);
+          S.totalCorrect++; save(); checkBadges();
+          $('fb').textContent = '✅ Perfect sentence!'; $('fb').style.color='var(--green)';
+          setTimeout(advance, 900);
+        }
+      } else {
+        b.classList.add('bad'); setTimeout(()=>b.classList.remove('bad'),350);
+        sfx('bad'); sess.wrongOnce = true; wordStat(w.w).wrong++; save();
+      }
+    };
+    pool.appendChild(b);
+  });
+}
+
+/* stage 4: spelling */
+function renderSpell(w){
+  sess.typed = []; sess.hintUsed = false;
+  $('sessBody').innerHTML = `
+    <div class="ex-card" style="min-height:120px;padding:16px">
+      <div class="prompt">Spell the word</div>
+      <div class="defin" style="font-size:15px">${w.d}</div>
+      <button class="audio-btn" onclick="speak('${w.w.replace(/'/g,"\\'")}')">🔊 Hear it</button>
+    </div>
+    <div class="slots" id="slots"></div>
+    <div class="feedback" id="fb"></div>
+    <div class="kb" id="kb"></div>
+    <button class="ghost-btn" onclick="spellHint()">💡 Hint (free, no bonus)</button>`;
+  drawSlots(w); buildKB(w); speak(w.w);
+}
+function drawSlots(w){
+  const el = $('slots'); el.innerHTML = '';
+  const target = w.w.toLowerCase();
+  for (let i=0;i<target.length;i++){
+    const s = document.createElement('div'); s.className='slot';
+    if (target[i]===' '){ s.style.background='transparent'; s.style.width='12px'; el.appendChild(s); continue; }
+    const t = sess.typed[i];
+    if (t){ s.textContent = t.ch; s.classList.add(t.hint?'hint':(t.ch===target[i]?'ok':'bad')); }
+    el.appendChild(s);
+  }
+}
+function spellKey(k, w){
+  const target = w.w.toLowerCase();
+  if (k==='back'){ sess.typed.pop(); if (target[sess.typed.length]===' ') sess.typed.pop(); drawSlots(w); return; }
+  if (sess.typed.length >= target.length) return;
+  if (target[sess.typed.length]===' ') sess.typed.push({ch:' ',hint:false});
+  sess.typed.push({ch:k, hint:false});
+  drawSlots(w);
+  if (sess.typed.length >= target.length) checkSpell(w);
+}
+function spellHint(){
+  const w = items()[sess.i], target = w.w.toLowerCase();
+  if (sess.typed.length >= target.length) return;
+  if (target[sess.typed.length]===' ') sess.typed.push({ch:' ',hint:false});
+  sess.typed.push({ch:target[sess.typed.length], hint:true});
+  sess.hintUsed = true; drawSlots(w);
+  if (sess.typed.length >= target.length) checkSpell(w);
+}
+function checkSpell(w){
+  const target = w.w.toLowerCase();
+  const ans = sess.typed.map(t=>t.ch).join('');
+  if (ans === target){
+    const clean = !sess.hintUsed && !sess.wrongOnce;
+    if (clean){ sess.firstTry++; earn(5); wordStat(w.w).mastered = true; wordStat(w.w).correct++; $('fb').textContent='✅ Mastered! +5 🪙'; }
+    else { earn(2); $('fb').textContent='👍 Correct! +2 🪙'; }
+    $('fb').style.color='var(--green)'; sfx('ok');
+    S.totalCorrect++; save(); checkBadges();
+    setTimeout(advance, 950);
+  } else {
+    sess.wrongOnce = true; wordStat(w.w).wrong++; save(); sfx('bad');
+    $('fb').textContent='❌ Almost — try again!'; $('fb').style.color='var(--red)';
+    setTimeout(()=>{ sess.typed=[]; drawSlots(w); $('fb').textContent=''; }, 900);
+  }
+}
+function buildKB(w){
+  const rows = ['qwertyuiop','asdfghjkl','zxcvbnm'];
+  const kb = $('kb'); kb.innerHTML='';
+  rows.forEach((r,ri)=>{
+    const div = document.createElement('div'); div.className='kb-row';
+    [...r].forEach(ch=>{ const b=document.createElement('button'); b.className='key'; b.textContent=ch;
+      b.onclick=()=>spellKey(ch,w); div.appendChild(b); });
+    if (ri===2){ const bk=document.createElement('button'); bk.className='key wide'; bk.textContent='⌫';
+      bk.onclick=()=>spellKey('back',w); div.appendChild(bk); }
+    kb.appendChild(div);
+  });
+}
+document.addEventListener('keydown', e=>{
+  if (!sess || !$('kb') || $('scrSess').classList.contains('hidden')) return;
+  const w = items()[sess.i];
+  if (/^[a-z'-]$/i.test(e.key)) spellKey(e.key.toLowerCase(), w);
+  else if (e.key==='Backspace') spellKey('back', w);
+});
+
+/* ================= end of session ================= */
+function endSession(){
+  const total = items().length * (STAGES.length-1); // scoring stages
+  const acc = sess.firstTry / total;
+  const stars = acc>=.9?3:acc>=.65?2:1;
+  const bonus = stars===3?20:stars===2?10:5;
+  S.coins += bonus;
+  const prev = S.units[sess.unit.id] || {};
+  S.units[sess.unit.id] = { done:true, stars:Math.max(prev.stars||0, stars) };
+  save(); checkBadges(); confetti(); sfx('win');
+  $('sessBody').innerHTML = `
+    <div class="end-wrap">
+      <div class="chest">🎁</div>
+      <div class="end-stars">${'⭐'.repeat(stars)}${'☆'.repeat(3-stars)}</div>
+      <div class="end-coins">+${sess.coins + bonus} 🪙 <span style="font-size:13px;color:var(--ink2)">(incl. +${bonus} chest bonus)</span></div>
+      <div class="end-note">${stars===3?'PERFECT! You are a star! 🌟':stars===2?'Great job! One more try for 3 stars?':'Good start! Practice makes perfect 💪'}</div>
+      <button class="next-btn" onclick="showScreen('home')">🏠 Back to units</button>
+      <button class="ghost-btn" onclick="startSession(ALL_UNITS.find(u=>u.id===${sess.unit.id}))">🔁 Try again for more stars</button>
+    </div>`;
+  $('sbarFill').style.width='100%';
+  $('stageChips').innerHTML='';
+  renderStats();
+}
+
+/* ================= review mode ================= */
+$('reviewBtn').onclick = ()=>{
+  const tw = trickyWords();
+  if (!tw.length) return;
+  startSession({ id:'review', title:'Tricky Words', emoji:'🎯', words:tw }, true);
+};
+
+/* ================= navigation ================= */
+function showScreen(name){
+  ['Home','Sess','Shop','Prof'].forEach(s=>$('scr'+s).classList.add('hidden'));
+  ['navHome','navShop','navProf'].forEach(n=>$(n).classList.remove('on'));
+  if (name==='home'){ $('scrHome').classList.remove('hidden'); $('navHome').classList.add('on'); sess=null; renderHome(); }
+  if (name==='sess'){ $('scrSess').classList.remove('hidden'); }
+  if (name==='shop'){ $('scrShop').classList.remove('hidden'); $('navShop').classList.add('on'); renderShop(); }
+  if (name==='prof'){ $('scrProf').classList.remove('hidden'); $('navProf').classList.add('on'); renderProfile(); }
+  window.scrollTo(0,0);
+}
+$('navHome').onclick = ()=>showScreen('home');
+$('navShop').onclick = ()=>showScreen('shop');
+$('navProf').onclick = ()=>showScreen('prof');
+$('avatarBtn').onclick = ()=>showScreen('shop');
+$('quitBtn').onclick = ()=>{ if (confirm('Leave this unit? Progress in this session will be lost.')) showScreen('home'); };
+
+/* ================= profile ================= */
+function renderProfile(){
+  $('badgeGrid').innerHTML = BADGES.map(b=>`<div class="bdg ${S.badges.includes(b.id)?'won':''}"><div class="ic">${b.ic}</div><div class="nm">${b.nm}</div></div>`).join('');
+  $('stickerShelf').innerHTML = S.stickers.length
+    ? S.stickers.map(s=>`<div class="item"><div class="ic">${s}</div></div>`).join('')
+    : `<div style="grid-column:1/4;color:var(--ink2);font-weight:700;font-size:13px;text-align:center;padding:10px">Buy fun stickers in the Shop! 🎁</div>`;
+  $('accentBtn').textContent = S.accent==='en-GB' ? '🇬🇧 UK' : '🇺🇸 US';
+  $('soundBtn').textContent = S.sound ? '🔔 On' : '🔕 Off';
+}
+$('accentBtn').onclick = ()=>{ S.accent = S.accent==='en-GB'?'en-US':'en-GB'; save(); renderProfile(); speak('hello'); };
+$('soundBtn').onclick = ()=>{ S.sound=!S.sound; save(); renderProfile(); sfx('ok'); };
+$('resetBtn').onclick = ()=>{ if (confirm('Delete ALL progress, coins and purchases?')){ localStorage.removeItem('ctnVocab'); location.reload(); } };
+
+/* ================= boot ================= */
+applyTheme(); renderHome();
+speechSynthesis && speechSynthesis.getVoices();
+</script>
+</body>
+</html>
